@@ -64,6 +64,7 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
 ### 1. DatabaseStack (`DisasterManagementDatabaseStack`)
 
 **DynamoDB Tables:**
+
 - `disaster-reports` - Stores all SOS reports
   - Partition Key: `id` (String)
   - GSIs: `shortCode-index`, `status-index`, `severity-index`
@@ -72,6 +73,7 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
   - GSI: `isActive-index`
 
 **S3 Bucket:**
+
 - Photo uploads with presigned URLs
 - 90-day lifecycle expiration
 - CORS enabled for web uploads
@@ -79,6 +81,7 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
 ### 2. BackendStack (`DisasterManagementBackendStack`)
 
 **Lambda Functions:**
+
 - `disaster-management-api` (512MB, 30s timeout)
   - Handles all REST API requests via serverless-http + Express
   - X-Ray tracing enabled
@@ -86,15 +89,18 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
   - Handles WebSocket connect/disconnect/message events
 
 **API Gateway (REST):**
+
 - Proxy integration to Lambda
 - CORS enabled
 - Rate limiting: 50 req/sec, burst 100
 
 **API Gateway v2 (WebSocket):**
+
 - Routes: `$connect`, `$disconnect`, `$default`
 - Manages real-time updates to connected clients
 
 **DynamoDB (WebSocket Connections):**
+
 - `disaster-websocket-connections`
 - TTL for automatic cleanup
 - GSI for connection type queries
@@ -102,10 +108,12 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
 ### 3. FrontendStack (`DisasterManagementFrontendStack`)
 
 **S3 Bucket:**
+
 - Static website hosting
 - Private access via CloudFront OAI
 
 **CloudFront Distribution:**
+
 - Global CDN with edge caching
 - HTTPS enforcement
 - SPA routing (all paths → index.html)
@@ -114,6 +122,7 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
 ## Prerequisites
 
 1. **AWS CLI** configured with credentials
+
    ```bash
    aws configure
    ```
@@ -121,6 +130,7 @@ This directory contains the AWS CDK infrastructure code for deploying the Disast
 2. **Node.js 20+** installed
 
 3. **AWS CDK CLI** installed
+
    ```bash
    npm install -g aws-cdk
    ```
@@ -181,11 +191,11 @@ aws cloudfront create-invalidation --distribution-id DIST-ID --paths "/*"
 
 After deployment, you'll get:
 
-| Output | Description |
-|--------|-------------|
-| `ApiUrl` | REST API Gateway endpoint |
-| `WebSocketUrl` | WebSocket API endpoint |
-| `FrontendUrl` | CloudFront distribution URL |
+| Output              | Description                 |
+| ------------------- | --------------------------- |
+| `ApiUrl`            | REST API Gateway endpoint   |
+| `WebSocketUrl`      | WebSocket API endpoint      |
+| `FrontendUrl`       | CloudFront distribution URL |
 | `UploadsBucketName` | S3 bucket for photo uploads |
 
 ## Environment Configuration
@@ -194,22 +204,22 @@ Update the frontend to use the deployed API URLs:
 
 ```typescript
 // frontend/src/config.ts
-export const API_URL = 'https://xxxx.execute-api.region.amazonaws.com/prod';
-export const WS_URL = 'wss://xxxx.execute-api.region.amazonaws.com/prod';
+export const API_URL = "https://xxxx.execute-api.region.amazonaws.com/prod";
+export const WS_URL = "wss://xxxx.execute-api.region.amazonaws.com/prod";
 ```
 
 ## Cost Estimation (Monthly)
 
-| Service | Estimated Cost |
-|---------|---------------|
-| Lambda (1M requests) | ~$0.20 |
-| API Gateway REST (1M requests) | ~$3.50 |
-| API Gateway WebSocket (1M messages) | ~$1.00 |
-| DynamoDB (On-demand) | ~$5-20 |
-| S3 + CloudFront | ~$1-5 |
-| **Total** | **~$10-30/month** |
+| Service                             | Estimated Cost    |
+| ----------------------------------- | ----------------- |
+| Lambda (1M requests)                | ~$0.20            |
+| API Gateway REST (1M requests)      | ~$3.50            |
+| API Gateway WebSocket (1M messages) | ~$1.00            |
+| DynamoDB (On-demand)                | ~$5-20            |
+| S3 + CloudFront                     | ~$1-5             |
+| **Total**                           | **~$10-30/month** |
 
-*Note: Costs scale with usage. AWS Free Tier covers most development usage.*
+_Note: Costs scale with usage. AWS Free Tier covers most development usage._
 
 ## Useful Commands
 
@@ -230,16 +240,21 @@ cat cdk.out/DisasterManagementBackendStack.template.json
 ## Troubleshooting
 
 ### esbuild Bundling Errors
+
 Make sure esbuild is installed:
+
 ```bash
 npm install esbuild --save-dev
 ```
 
 ### Permission Errors
+
 Ensure your AWS credentials have sufficient permissions for:
+
 - DynamoDB, S3, Lambda, API Gateway, CloudFront, IAM
 
 ### WebSocket Connection Issues
+
 1. Check CORS settings on API Gateway
 2. Verify WebSocket URL uses `wss://` protocol
 3. Check Lambda CloudWatch logs for errors

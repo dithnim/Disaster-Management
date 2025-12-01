@@ -6,19 +6,19 @@
 import {
   APIGatewayProxyResult,
   APIGatewayProxyWebsocketEventV2,
-} from 'aws-lambda';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+} from "aws-lambda";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   PutCommand,
   DeleteCommand,
   QueryCommand,
   ScanCommand,
-} from '@aws-sdk/lib-dynamodb';
+} from "@aws-sdk/lib-dynamodb";
 import {
   ApiGatewayManagementApiClient,
   PostToConnectionCommand,
-} from '@aws-sdk/client-apigatewaymanagementapi';
+} from "@aws-sdk/client-apigatewaymanagementapi";
 
 // ============================================
 // AWS Clients
@@ -27,9 +27,10 @@ const dynamoClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 // Tables
-const CONNECTIONS_TABLE = process.env.CONNECTIONS_TABLE || 'disaster-websocket-connections';
-const REPORTS_TABLE = process.env.REPORTS_TABLE || 'disaster-reports';
-const RESCUERS_TABLE = process.env.RESCUERS_TABLE || 'disaster-rescuers';
+const CONNECTIONS_TABLE =
+  process.env.CONNECTIONS_TABLE || "disaster-websocket-connections";
+const REPORTS_TABLE = process.env.REPORTS_TABLE || "disaster-reports";
+const RESCUERS_TABLE = process.env.RESCUERS_TABLE || "disaster-rescuers";
 
 // ============================================
 // Types
@@ -91,10 +92,10 @@ async function broadcastToType(
   const result = await docClient.send(
     new QueryCommand({
       TableName: CONNECTIONS_TABLE,
-      IndexName: 'type-index',
-      KeyConditionExpression: 'connectionType = :type',
+      IndexName: "type-index",
+      KeyConditionExpression: "connectionType = :type",
       ExpressionAttributeValues: {
-        ':type': connectionType,
+        ":type": connectionType,
       },
     })
   );
@@ -132,7 +133,7 @@ async function handleConnect(
   // Connection will be updated with type when client sends identify message
   const connection: Connection = {
     connectionId,
-    connectionType: 'unknown',
+    connectionType: "unknown",
     connectedAt: Date.now(),
     ttl: Math.floor(Date.now() / 1000) + 86400, // 24 hour TTL
   };
@@ -162,16 +163,20 @@ async function handleMessage(
   const endpoint = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
 
   switch (message.action) {
-    case 'rescuer:join': {
-      const data = message.data as { id: string; name: string; organization?: string };
-      
+    case "rescuer:join": {
+      const data = message.data as {
+        id: string;
+        name: string;
+        organization?: string;
+      };
+
       // Update connection as rescuer
       await docClient.send(
         new PutCommand({
           TableName: CONNECTIONS_TABLE,
           Item: {
             connectionId,
-            connectionType: 'rescuer',
+            connectionType: "rescuer",
             rescuerId: data.id,
             rescuerName: data.name,
             connectedAt: Date.now(),
@@ -188,7 +193,7 @@ async function handleMessage(
             id: data.id,
             name: data.name,
             organization: data.organization,
-            status: 'active',
+            status: "active",
             lastSeen: Date.now(),
           },
         })
@@ -197,22 +202,22 @@ async function handleMessage(
       // Send current reports to rescuer
       const reports = await getReports();
       await sendToConnection(endpoint, connectionId, {
-        event: 'reports:sync',
+        event: "reports:sync",
         data: reports,
       });
       break;
     }
 
-    case 'user:track': {
+    case "user:track": {
       const shortCode = message.data as string;
-      
+
       // Update connection with tracking info
       await docClient.send(
         new PutCommand({
           TableName: CONNECTIONS_TABLE,
           Item: {
             connectionId,
-            connectionType: 'user',
+            connectionType: "user",
             trackingCode: shortCode.toUpperCase(),
             connectedAt: Date.now(),
             ttl: Math.floor(Date.now() / 1000) + 86400,
@@ -222,9 +227,13 @@ async function handleMessage(
       break;
     }
 
-    case 'rescuer:location': {
-      const data = message.data as { rescuerId: string; lat: number; lng: number };
-      
+    case "rescuer:location": {
+      const data = message.data as {
+        rescuerId: string;
+        lat: number;
+        lng: number;
+      };
+
       // Update rescuer location
       await docClient.send(
         new PutCommand({
@@ -239,12 +248,18 @@ async function handleMessage(
       );
 
       // Broadcast to other rescuers
-      await broadcastToType(endpoint, 'rescuer', 'rescuer:location', data, connectionId);
+      await broadcastToType(
+        endpoint,
+        "rescuer",
+        "rescuer:location",
+        data,
+        connectionId
+      );
       break;
     }
 
     default:
-      console.log('Unknown action:', message.action);
+      console.log("Unknown action:", message.action);
   }
 }
 
@@ -259,15 +274,15 @@ export async function handler(
 
   try {
     switch (routeKey) {
-      case '$connect':
+      case "$connect":
         await handleConnect(connectionId, event);
         break;
 
-      case '$disconnect':
+      case "$disconnect":
         await handleDisconnect(connectionId);
         break;
 
-      case '$default':
+      case "$default":
         if (event.body) {
           const message = JSON.parse(event.body) as WebSocketMessage;
           await handleMessage(connectionId, event, message);
@@ -275,12 +290,12 @@ export async function handler(
         break;
 
       default:
-        console.log('Unknown route:', routeKey);
+        console.log("Unknown route:", routeKey);
     }
 
-    return { statusCode: 200, body: 'OK' };
+    return { statusCode: 200, body: "OK" };
   } catch (error) {
-    console.error('WebSocket error:', error);
-    return { statusCode: 500, body: 'Internal Server Error' };
+    console.error("WebSocket error:", error);
+    return { statusCode: 500, body: "Internal Server Error" };
   }
 }
