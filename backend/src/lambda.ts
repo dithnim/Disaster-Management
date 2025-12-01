@@ -32,6 +32,7 @@ import {
   parseBoolean,
   parseIntSafe,
 } from "./utils/helpers";
+import { sendStatusUpdate } from "./services/smsService";
 
 // ============================================
 // AWS Clients
@@ -339,6 +340,21 @@ app.post(
         sanitizeReport(updatedReport)
       );
 
+      // Send SMS notification to reporter (if SMS source)
+      if (updatedReport.phone && updatedReport.source === "sms") {
+        try {
+          await sendStatusUpdate(
+            updatedReport.phone,
+            updatedReport.shortCode,
+            "claimed",
+            rescuerName
+          );
+          console.log(`[SMS CLAIMED] Notified ${updatedReport.phone}`);
+        } catch (smsError) {
+          console.error("[SMS CLAIMED ERROR]", smsError);
+        }
+      }
+
       res.json({ ok: true, report: sanitizeReport(updatedReport) });
     } catch (error: unknown) {
       console.error("Error claiming report:", error);
@@ -392,12 +408,31 @@ app.put(
 
       const updatedReport = result.Attributes as Report;
 
-      // Broadcast update
+      // Broadcast update to dashboard
       await broadcastToConnections(
         "rescuer",
         "report:update",
         sanitizeReport(updatedReport)
       );
+
+      // Send SMS notification to the person who reported (if they provided a phone)
+      if (updatedReport.phone && updatedReport.source === "sms") {
+        try {
+          await sendStatusUpdate(
+            updatedReport.phone,
+            updatedReport.shortCode,
+            status,
+            updatedReport.claimedByName,
+            eta
+          );
+          console.log(
+            `[SMS STATUS] Sent ${status} update to ${updatedReport.phone}`
+          );
+        } catch (smsError) {
+          console.error("[SMS STATUS ERROR]", smsError);
+          // Don't fail the request if SMS fails
+        }
+      }
 
       res.json({ ok: true, report: sanitizeReport(updatedReport) });
     } catch (error) {
@@ -569,32 +604,109 @@ app.get("/api/stats", async (_req: Request, res: Response): Promise<void> => {
   }
 });
 
-// SMS incoming webhook
+// SMS incoming webhook (Twilio)
 app.post(
   "/api/sms/incoming",
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { From: phone, Body: body } = req.body;
+      // Twilio sends data as form-urlencoded
+      const { From: phone, Body: body, MessageSid: messageSid } = req.body;
+
+      console.log(
+        `[SMS INCOMING] From: ${phone}, Body: ${body}, SID: ${messageSid}`
+      );
 
       if (!body) {
-        res.status(400).json({ error: "No message body" });
+        res.type("text/xml").send(`
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Response>
+            <Message>DisasterSOS: Please send your message with location. Example: SOS 6.9271 79.8612 need help</Message>
+          </Response>
+        `);
         return;
       }
 
+      // Check if it's a status check request
+      const statusMatch = body.trim().match(/^STATUS\s+([A-Z0-9]{4})$/i);
+      if (statusMatch) {
+        const shortCode = statusMatch[1].toUpperCase();
+
+        // Look up the report
+        const result = await docClient.send(
+          new DocScanCommand({
+            TableName: REPORTS_TABLE,
+            FilterExpression: "shortCode = :code",
+            ExpressionAttributeValues: { ":code": shortCode },
+          })
+        );
+
+        if (result.Items && result.Items.length > 0) {
+          const report = result.Items[0] as Report;
+          const statusMessages: Record<string, string> = {
+            new: "waiting for a rescuer",
+            claimed: `claimed by ${report.claimedByName || "a rescuer"}`,
+            en_route: "rescuer is on the way",
+            arrived: "rescuer has arrived at your location",
+            rescued: "marked as rescued",
+            closed: "case closed",
+          };
+          const statusText = statusMessages[report.status] || report.status;
+
+          res.type("text/xml").send(`
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Response>
+              <Message>DisasterSOS: Report ${shortCode} is ${statusText}.</Message>
+            </Response>
+          `);
+        } else {
+          res.type("text/xml").send(`
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Response>
+              <Message>DisasterSOS: Report ${shortCode} not found. Please check the code.</Message>
+            </Response>
+          `);
+        }
+        return;
+      }
+
+      // Try to parse as SOS message
       const parsed = parseSMS(body);
 
       if (!parsed) {
-        res.status(400).json({ error: "Could not parse SMS" });
+        // Send help message if can't parse
+        res.type("text/xml").send(`
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Response>
+            <Message>DisasterSOS: Could not understand. Send: SOS 6.9271 79.8612 [message]. Or share Google Maps link with your message.</Message>
+          </Response>
+        `);
         return;
       }
 
+      // Validate Sri Lanka coordinates (rough bounds)
+      if (
+        parsed.lat < 5.9 ||
+        parsed.lat > 9.9 ||
+        parsed.lng < 79.5 ||
+        parsed.lng > 82.0
+      ) {
+        res.type("text/xml").send(`
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Response>
+            <Message>DisasterSOS: Location appears to be outside Sri Lanka. Please send valid coordinates.</Message>
+          </Response>
+        `);
+        return;
+      }
+
+      // Create report from SMS - always mark as CRITICAL
       const report: Report = {
         id: uuidv4(),
         shortCode: generateShortCode(),
         lat: parsed.lat,
         lng: parsed.lng,
-        message: parsed.message || "SOS via SMS",
-        severity: parsed.severity || ("high" as Severity),
+        message: parsed.message || "🆘 SOS via SMS",
+        severity: "critical" as Severity, // SMS reports are always critical
         status: "new" as ReportStatus,
         timestamp: Date.now(),
         lastUpdate: Date.now(),
@@ -608,6 +720,7 @@ app.post(
         isFragile: parsed.isFragile || false,
         peopleCount: parsed.peopleCount || 1,
         source: "sms",
+        rawSms: body,
       };
 
       await docClient.send(
@@ -617,6 +730,10 @@ app.post(
         })
       );
 
+      console.log(
+        `[SMS REPORT CREATED] ID: ${report.id}, ShortCode: ${report.shortCode}`
+      );
+
       // Broadcast to rescuers
       await broadcastToConnections(
         "rescuer",
@@ -624,16 +741,26 @@ app.post(
         sanitizeReport(report)
       );
 
-      // TwiML response
+      // TwiML response with confirmation
       res.type("text/xml").send(`
-      <?xml version="1.0" encoding="UTF-8"?>
-      <Response>
-        <Message>SOS received! Code: ${report.shortCode}. Help is on the way.</Message>
-      </Response>
-    `);
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Message>🆘 DisasterSOS: SOS RECEIVED!
+Code: ${report.shortCode}
+Location: ${report.lat.toFixed(4)}, ${report.lng.toFixed(4)}
+Help is being dispatched. Reply "STATUS ${
+        report.shortCode
+      }" to check status.</Message>
+        </Response>
+      `);
     } catch (error) {
-      console.error("SMS error:", error);
-      res.status(500).json({ error: "Failed to process SMS" });
+      console.error("SMS webhook error:", error);
+      res.type("text/xml").send(`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Message>DisasterSOS: Error processing your message. Please try again.</Message>
+        </Response>
+      `);
     }
   }
 );

@@ -421,7 +421,7 @@ const DashboardPage: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-start justify-between mb-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${getSeverityColor(
                           report.severity
@@ -429,6 +429,11 @@ const DashboardPage: React.FC = () => {
                       >
                         {report.severity.toUpperCase()}
                       </span>
+                      {report.source === "sms" && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-600 text-purple-100">
+                          📱 SMS
+                        </span>
+                      )}
                       {report.status !== "new" &&
                         report.status !== "closed" &&
                         report.status !== "rescued" && (

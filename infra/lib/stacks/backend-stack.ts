@@ -68,6 +68,10 @@ export class BackendStack extends cdk.Stack {
         CONNECTIONS_TABLE: connectionsTable.tableName,
         UPLOADS_BUCKET: uploadsBucket.bucketName,
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
+        // Twilio SMS Configuration (set via AWS console or CI/CD secrets)
+        TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || "",
+        TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || "",
+        TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER || "",
       },
       logRetention: logs.RetentionDays.ONE_MONTH,
       tracing: lambda.Tracing.ACTIVE,
