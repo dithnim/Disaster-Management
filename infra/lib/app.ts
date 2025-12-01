@@ -38,6 +38,7 @@ backendStack.addDependency(databaseStack);
 const frontendStack = new FrontendStack(app, `${appName}FrontendStack`, {
   env,
   description: "Frontend static hosting with S3 and CloudFront",
+  restApi: backendStack.restApi,
   apiUrl: backendStack.apiUrl,
 });
 

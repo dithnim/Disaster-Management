@@ -1,0 +1,23 @@
+{
+  "DisasterManagementDatabaseStack": {
+    "UploadsBucketArn": "arn:aws:s3:::disaster-uploads-182896148148",
+    "RescuersTableName": "disaster-rescuers",
+    "ExportsOutputRefRescuersTableC6780FE3C75C7024": "disaster-rescuers",
+    "ExportsOutputFnGetAttUploadsBucket5E5E9B64Arn8603C131": "arn:aws:s3:::disaster-uploads-182896148148",
+    "ExportsOutputRefReportsTable282F228301302D83": "disaster-reports",
+    "UploadsBucketName": "disaster-uploads-182896148148",
+    "ExportsOutputRefUploadsBucket5E5E9B64F2F56CC2": "disaster-uploads-182896148148",
+    "ExportsOutputFnGetAttReportsTable282F2283Arn95C8A393": "arn:aws:dynamodb:us-east-1:182896148148:table/disaster-reports",
+    "ExportsOutputFnGetAttRescuersTableC6780FE3ArnC41EC469": "arn:aws:dynamodb:us-east-1:182896148148:table/disaster-rescuers",
+    "ReportsTableName": "disaster-reports"
+  },
+  "DisasterManagementBackendStack": {
+    "ApiUrl": "https://oe0mn3o8c4.execute-api.us-east-1.amazonaws.com/prod/",
+    "ExportsOutputRefDisasterApiDeploymentStageprod99DF3D6FAFA3614C": "prod",
+    "WebSocketUrl": "wss://31pgn6jv79.execute-api.us-east-1.amazonaws.com/prod",
+    "DisasterApiEndpoint3B710363": "https://oe0mn3o8c4.execute-api.us-east-1.amazonaws.com/prod/",
+    "ConnectionsTableName": "disaster-websocket-connections",
+    "ApiHandlerArn": "arn:aws:lambda:us-east-1:182896148148:function:disaster-management-api",
+    "ExportsOutputRefDisasterApiA8FCC11736A7C8BD": "oe0mn3o8c4"
+  }
+}

@@ -1,12 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 export interface FrontendStackProps extends cdk.StackProps {
+  restApi: apigateway.RestApi;
   apiUrl: string;
 }
 
@@ -17,7 +18,7 @@ export class FrontendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, props);
 
-    const { apiUrl } = props;
+    const { restApi, apiUrl } = props;
 
     // ============================================
     // S3 Bucket for Static Hosting
@@ -72,33 +73,13 @@ export class FrontendStack extends cdk.Stack {
       },
       additionalBehaviors: {
         "/api/*": {
-          origin: new origins.HttpOrigin(
-            // Extract hostname from API URL
-            apiUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""),
-            {
-              protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-            }
-          ),
+          origin: new origins.RestApiOrigin(restApi),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
           cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
-        },
-        "/socket.io/*": {
-          origin: new origins.HttpOrigin(
-            apiUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""),
-            {
-              protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-            }
-          ),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-          cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
-          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
         },
       },
       errorResponses: [
@@ -115,7 +96,7 @@ export class FrontendStack extends cdk.Stack {
           ttl: cdk.Duration.seconds(0),
         },
       ],
-      priceClass: cloudfront.PriceClass.PRICE_CLASS_100, // Use only North America and Europe edge locations (cheaper)
+      priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
       enabled: true,
       httpVersion: cloudfront.HttpVersion.HTTP2_AND_3,
     });

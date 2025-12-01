@@ -20,6 +20,7 @@ export interface BackendStackProps extends cdk.StackProps {
 export class BackendStack extends cdk.Stack {
   public readonly apiUrl: string;
   public readonly websocketUrl: string;
+  public readonly restApi: apigateway.RestApi;
 
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
@@ -129,6 +130,7 @@ export class BackendStack extends cdk.Stack {
     apiResource.addMethod("ANY", lambdaIntegration);
 
     this.apiUrl = api.url;
+    this.restApi = api;
 
     // ============================================
     // WebSocket Lambda Function
