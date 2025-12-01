@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disaster SOS - SMS Quick Reference</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: white;
+      padding: 20px;
+    }
+    
+    .card {
+      max-width: 400px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+    
+    .phone-number {
+      background: white;
+      color: #dc2626;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .phone-number .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+    
+    .phone-number .number {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: monospace;
+    }
+    
+    .format-section {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .format-section h2 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+    
+    .format-example {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    
+    .format-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .format-breakdown span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .codes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    
+    .code-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    
+    .code-letter {
+      background: white;
+      color: #dc2626;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-weight: 800;
+      font-family: monospace;
+    }
+    
+    .how-to-get-location {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .how-to-get-location h2 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+    
+    .how-to-get-location ol {
+      padding-left: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 16px;
+    }
+    
+    .qr-placeholder {
+      width: 80px;
+      height: 80px;
+      background: white;
+      margin: 0 auto 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 10px;
+    }
+    
+    @media print {
+      body { background: white; padding: 0; }
+      .card { 
+        box-shadow: none; 
+        max-width: 100%;
+        border: 3px solid #dc2626;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>🆘 SOS SMS</h1>
+      <p>Emergency Help via Text Message</p>
+    </div>
+    
+    <div class="phone-number">
+      <div class="label">Send SMS To</div>
+      <div class="number">+94 XX XXX XXXX</div>
+    </div>
+    
+    <div class="format-section">
+      <h2>📱 Quick Format</h2>
+      <div class="format-example">H 6.912 79.852 A</div>
+      <div class="format-breakdown">
+        <span>H = Help</span>
+        <span>LAT LON</span>
+        <span>Code</span>
+      </div>
+    </div>
+    
+    <div class="format-section">
+      <h2>📋 Situation Codes</h2>
+      <div class="codes-grid">
+        <div class="code-item">
+          <span class="code-letter">A</span> Adult trapped
+        </div>
+        <div class="code-item">
+          <span class="code-letter">C</span> Child
+        </div>
+        <div class="code-item">
+          <span class="code-letter">M</span> Medical
+        </div>
+        <div class="code-item">
+          <span class="code-letter">I</span> Injured
+        </div>
+        <div class="code-item">
+          <span class="code-letter">F</span> Fire
+        </div>
+        <div class="code-item">
+          <span class="code-letter">W</span> Water/Flood
+        </div>
+        <div class="code-item">
+          <span class="code-letter">B</span> Building
+        </div>
+        <div class="code-item">
+          <span class="code-letter">E</span> Elderly
+        </div>
+        <div class="code-item">
+          <span class="code-letter">P</span> Pregnant
+        </div>
+        <div class="code-item">
+          <span class="code-letter">T</span> Many trapped
+        </div>
+      </div>
+    </div>
+    
+    <div class="how-to-get-location">
+      <h2>📍 How to Get Your Location</h2>
+      <ol>
+        <li>Open Google Maps on your phone</li>
+        <li>Tap the blue dot (your location)</li>
+        <li>Numbers like "6.912, 79.852" appear</li>
+        <li>Use those numbers in your SMS</li>
+      </ol>
+    </div>
+    
+    <div class="format-section">
+      <h2>💬 Example Messages</h2>
+      <div style="font-size: 13px; line-height: 1.8;">
+        <code style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; display: block; margin-bottom: 8px;">H 6.912 79.852 M</code>
+        <code style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; display: block; margin-bottom: 8px;">SOS 6.912,79.852 injured child</code>
+        <code style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; display: block;">HELP LAT:6.912 LON:79.852 MSG:flood</code>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="qr-placeholder">[QR Code]</div>
+      <p>If you have internet, use the app instead:<br>
+      <strong>app.disastersos.lk</strong></p>
+    </div>
+  </div>
+</body>
+</html>
