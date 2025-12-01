@@ -448,7 +448,7 @@ app.post(
   }
 );
 
-// Register rescuer
+// Register rescuer (only called once on first registration)
 app.post(
   "/api/rescuers/register",
   async (req: Request, res: Response): Promise<void> => {
@@ -466,6 +466,7 @@ app.post(
         phone: phone || null,
         organization: organization || "Independent",
         registeredAt: Date.now(),
+        lastSeen: Date.now(),
         isActive: true,
       };
 
@@ -484,23 +485,61 @@ app.post(
   }
 );
 
+// Rescuer heartbeat - updates lastSeen timestamp
+app.post(
+  "/api/rescuers/heartbeat",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.body;
+
+      if (!id) {
+        res.status(400).json({ error: "Rescuer ID is required" });
+        return;
+      }
+
+      await docClient.send(
+        new UpdateCommand({
+          TableName: RESCUERS_TABLE,
+          Key: { id },
+          UpdateExpression: "SET lastSeen = :now, isActive = :active",
+          ExpressionAttributeValues: {
+            ":now": Date.now(),
+            ":active": true,
+          },
+        })
+      );
+
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error updating rescuer heartbeat:", error);
+      res.status(500).json({ error: "Failed to update heartbeat" });
+    }
+  }
+);
+
 // Get stats
 app.get("/api/stats", async (_req: Request, res: Response): Promise<void> => {
   try {
+    // Consider rescuers active if seen in last 5 minutes
+    const ACTIVE_THRESHOLD = 5 * 60 * 1000;
+    const activeThreshold = Date.now() - ACTIVE_THRESHOLD;
+
     const [reportsResult, rescuersResult, connectionsResult] =
       await Promise.all([
         docClient.send(new DocScanCommand({ TableName: REPORTS_TABLE })),
         docClient.send(
           new DocScanCommand({
             TableName: RESCUERS_TABLE,
-            FilterExpression: "isActive = :active",
-            ExpressionAttributeValues: { ":active": true },
+            FilterExpression: "lastSeen >= :threshold",
+            ExpressionAttributeValues: { ":threshold": activeThreshold },
           })
         ),
         docClient.send(new DocScanCommand({ TableName: CONNECTIONS_TABLE })),
       ]);
 
     const reports = reportsResult.Items || [];
+    // Count only rescuers seen in last 5 minutes
+    const activeRescuers = rescuersResult.Items || [];
 
     const stats = {
       total: reports.length,
@@ -518,7 +557,7 @@ app.get("/api/stats", async (_req: Request, res: Response): Promise<void> => {
         medium: reports.filter((r) => r.severity === "medium").length,
         low: reports.filter((r) => r.severity === "low").length,
       },
-      activeRescuers: rescuersResult.Items?.length || 0,
+      activeRescuers: activeRescuers.length,
       connectedClients: connectionsResult.Items?.length || 0,
       lastUpdate: Date.now(),
     };

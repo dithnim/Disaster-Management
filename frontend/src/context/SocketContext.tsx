@@ -123,12 +123,12 @@ export function SocketProvider({
       if (socket && connected) {
         socket.emit("rescuer:join", rescuerInfo);
       }
-      // Also register via REST API for AWS deployment
-      fetch(`${config.apiUrl}/api/rescuers/register`, {
+      // Send heartbeat to mark rescuer as active (don't re-register)
+      fetch(`${config.apiUrl}/api/rescuers/heartbeat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rescuerInfo),
-      }).catch((err) => console.error("Rescuer registration failed:", err));
+        body: JSON.stringify({ id: rescuerInfo.id }),
+      }).catch((err) => console.error("Rescuer heartbeat failed:", err));
     },
     [socket, connected]
   );

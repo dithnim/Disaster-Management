@@ -111,7 +111,7 @@ const DashboardPage: React.FC = () => {
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
 
-  // Load rescuer info on mount
+  // Load rescuer info on mount and send initial heartbeat
   useEffect(() => {
     const stored = localStorage.getItem(RESCUER_KEY);
     if (stored) {
@@ -122,6 +122,22 @@ const DashboardPage: React.FC = () => {
       setShowRegister(true);
     }
   }, [joinAsRescuer]);
+
+  // Send periodic heartbeat to keep rescuer marked as active
+  useEffect(() => {
+    if (!rescuerInfo) return;
+
+    // Send heartbeat every 2 minutes
+    const heartbeatInterval = setInterval(() => {
+      fetch(`${config.apiUrl}/api/rescuers/heartbeat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: rescuerInfo.id }),
+      }).catch((err) => console.error("Heartbeat failed:", err));
+    }, 2 * 60 * 1000);
+
+    return () => clearInterval(heartbeatInterval);
+  }, [rescuerInfo]);
 
   const handleRegister = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -500,7 +516,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Selected Report Detail Panel */}
         {selectedReport && (
-          <div className="absolute bottom-0 left-0 right-0 lg:right-auto lg:w-96 bg-gray-800 border-t lg:border-r border-gray-700 p-4 shadow-2xl">
+          <div className="absolute bottom-0 left-0 right-0 lg:right-auto lg:w-96 bg-gray-800 border-t lg:border-r border-gray-700 p-4 shadow-2xl z-[1000]">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
