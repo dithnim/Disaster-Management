@@ -148,7 +148,7 @@ const HomePage: React.FC = () => {
     try {
       // If there's a photo, use FormData; otherwise use JSON
       let response: Response;
-      
+
       if (photo) {
         const formData = new FormData();
         formData.append("lat", location.lat.toString());

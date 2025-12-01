@@ -5,6 +5,7 @@ import React, {
   useState,
   useCallback,
   ReactNode,
+  useRef,
 } from "react";
 import { io, Socket } from "socket.io-client";
 import type { Report, Rescuer, SocketContextValue } from "../types";
@@ -23,29 +24,75 @@ interface SocketProviderProps {
   children: ReactNode;
 }
 
+// Polling interval when WebSocket is not connected (5 seconds)
+const POLL_INTERVAL = 5000;
+
 export function SocketProvider({
   children,
 }: SocketProviderProps): React.ReactElement {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [reports, setReports] = useState<Report[]>([]);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Fetch reports via REST API
+  const fetchReports = useCallback(async () => {
+    try {
+      const response = await fetch("/api/reports");
+      if (response.ok) {
+        const data = await response.json();
+        setReports(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch reports:", error);
+    }
+  }, []);
+
+  // Start polling when not connected
+  useEffect(() => {
+    // Always fetch reports initially
+    fetchReports();
+
+    // If not connected via WebSocket, poll for updates
+    if (!connected) {
+      pollIntervalRef.current = setInterval(fetchReports, POLL_INTERVAL);
+    }
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [connected, fetchReports]);
 
   useEffect(() => {
-    // Connect to Socket.IO server
+    // Try to connect to Socket.IO server (works locally)
     const socketInstance = io(window.location.origin, {
       transports: ["websocket", "polling"],
-      reconnectionAttempts: 10,
+      reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      timeout: 5000,
     });
 
     socketInstance.on("connect", () => {
       console.log("Socket connected");
       setConnected(true);
+      // Stop polling when connected
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
     });
 
     socketInstance.on("disconnect", () => {
       console.log("Socket disconnected");
       setConnected(false);
+    });
+
+    socketInstance.on("connect_error", (error) => {
+      console.log("Socket connection error:", error.message);
+      // Silently fail - we'll use REST polling instead
     });
 
     // Handle incoming reports
@@ -72,29 +119,35 @@ export function SocketProvider({
 
   const joinAsRescuer = useCallback(
     (rescuerInfo: Rescuer) => {
-      if (socket) {
+      if (socket && connected) {
         socket.emit("rescuer:join", rescuerInfo);
       }
+      // Also register via REST API for AWS deployment
+      fetch("/api/rescuers/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rescuerInfo),
+      }).catch((err) => console.error("Rescuer registration failed:", err));
     },
-    [socket]
+    [socket, connected]
   );
 
   const trackReport = useCallback(
     (shortCode: string) => {
-      if (socket) {
+      if (socket && connected) {
         socket.emit("user:track", shortCode);
       }
     },
-    [socket]
+    [socket, connected]
   );
 
   const updateLocation = useCallback(
     (rescuerId: string, lat: number, lng: number) => {
-      if (socket) {
+      if (socket && connected) {
         socket.emit("rescuer:location", { rescuerId, lat, lng });
       }
     },
-    [socket]
+    [socket, connected]
   );
 
   const value: SocketContextValue = {
