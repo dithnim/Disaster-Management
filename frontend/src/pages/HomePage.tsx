@@ -146,25 +146,46 @@ const HomePage: React.FC = () => {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("lat", location.lat.toString());
-      formData.append("lng", location.lng.toString());
-      formData.append("message", message || "Need help!");
-      formData.append("severity", severity);
-      formData.append("isMedical", isMedical.toString());
-      formData.append("isFragile", isFragile.toString());
-      formData.append("peopleCount", peopleCount.toString());
-      if (batteryLevel !== null) {
-        formData.append("batteryLevel", batteryLevel.toString());
-      }
+      // If there's a photo, use FormData; otherwise use JSON
+      let response: Response;
+      
       if (photo) {
+        const formData = new FormData();
+        formData.append("lat", location.lat.toString());
+        formData.append("lng", location.lng.toString());
+        formData.append("message", message || "Need help!");
+        formData.append("severity", severity);
+        formData.append("isMedical", isMedical.toString());
+        formData.append("isFragile", isFragile.toString());
+        formData.append("peopleCount", peopleCount.toString());
+        if (batteryLevel !== null) {
+          formData.append("batteryLevel", batteryLevel.toString());
+        }
         formData.append("photo", photo);
-      }
 
-      const response = await fetch("/api/reports", {
-        method: "POST",
-        body: formData,
-      });
+        response = await fetch("/api/reports", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        // Send as JSON when no photo
+        response = await fetch("/api/reports", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            lat: location.lat,
+            lng: location.lng,
+            message: message || "Need help!",
+            severity,
+            isMedical,
+            isFragile,
+            peopleCount,
+            batteryLevel,
+          }),
+        });
+      }
 
       const data = await response.json();
 

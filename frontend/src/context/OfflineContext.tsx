@@ -64,19 +64,20 @@ export function OfflineProvider({
 
     for (const report of pendingReports) {
       try {
-        const formData = new FormData();
-        formData.append("lat", report.lat.toString());
-        formData.append("lng", report.lng.toString());
-        formData.append("message", report.message || "Need help!");
-        formData.append("severity", report.severity || "high");
-        if (report.isMedical) formData.append("isMedical", "true");
-        if (report.isFragile) formData.append("isFragile", "true");
-        if (report.peopleCount)
-          formData.append("peopleCount", report.peopleCount.toString());
-
         const response = await fetch("/api/reports", {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            lat: report.lat,
+            lng: report.lng,
+            message: report.message || "Need help!",
+            severity: report.severity || "high",
+            isMedical: report.isMedical,
+            isFragile: report.isFragile,
+            peopleCount: report.peopleCount,
+          }),
         });
 
         if (response.ok) {
