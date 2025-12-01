@@ -75,6 +75,16 @@ workbox-*.js
 # Optional eslint cache
 .eslintcache
 
+# AWS CDK
+infra/cdk.out/
+cdk.out/
+cdk.context.json
+.cdk.staging/
+
+# Lambda bundled assets
+*.zip
+
 # Misc
 *.pem
 *.key
+
