@@ -10,6 +10,7 @@ import {
   Activity,
 } from "lucide-react";
 import type { StatsResponse } from "../types";
+import { endpoints } from "../config";
 
 interface StatusCard {
   label: string;
@@ -45,7 +46,7 @@ const StatsPage: React.FC = () => {
 
   const fetchStats = async (): Promise<void> => {
     try {
-      const response = await fetch("/api/stats");
+      const response = await fetch(endpoints.stats);
       if (response.ok) {
         const data = await response.json();
         setStats(data);

@@ -16,6 +16,7 @@ import {
   Copy,
 } from "lucide-react";
 import type { Report, Status, StatusInfo, ProgressStep } from "../types";
+import { config } from "../config";
 
 const TrackPage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -62,7 +63,7 @@ const TrackPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/reports/${code}`);
+      const response = await fetch(`${config.apiUrl}/api/reports/${code}`);
       if (response.ok) {
         const data = await response.json();
         setReport(data);

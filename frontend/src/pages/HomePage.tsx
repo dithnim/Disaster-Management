@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useOffline } from "../context/OfflineContext";
 import type { Location, Severity, SOSSuccess, SeverityOption } from "../types";
+import { endpoints } from "../config";
 
 // Battery API types
 interface BatteryManager {
@@ -163,13 +164,13 @@ const HomePage: React.FC = () => {
         }
         formData.append("photo", photo);
 
-        response = await fetch("/api/reports", {
+        response = await fetch(endpoints.reports, {
           method: "POST",
           body: formData,
         });
       } else {
         // Send as JSON when no photo
-        response = await fetch("/api/reports", {
+        response = await fetch(endpoints.reports, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

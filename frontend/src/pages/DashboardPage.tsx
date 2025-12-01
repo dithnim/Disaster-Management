@@ -21,6 +21,7 @@ import type {
   Severity,
   Status,
 } from "../types";
+import { config } from "../config";
 
 // Fix Leaflet default marker icon issue
 delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
@@ -125,7 +126,7 @@ const DashboardPage: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/rescuers/register", {
+      const response = await fetch(`${config.apiUrl}/api/rescuers/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, organization }),
@@ -149,14 +150,17 @@ const DashboardPage: React.FC = () => {
     if (!rescuerInfo) return;
 
     try {
-      const response = await fetch(`/api/reports/${reportId}/claim`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          rescuerId: rescuerInfo.id,
-          rescuerName: rescuerInfo.name,
-        }),
-      });
+      const response = await fetch(
+        `${config.apiUrl}/api/reports/${reportId}/claim`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rescuerId: rescuerInfo.id,
+            rescuerName: rescuerInfo.name,
+          }),
+        }
+      );
 
       if (response.ok) {
         // Report will be updated via WebSocket
@@ -172,7 +176,7 @@ const DashboardPage: React.FC = () => {
     status: Status
   ): Promise<void> => {
     try {
-      await fetch(`/api/reports/${reportId}/status`, {
+      await fetch(`${config.apiUrl}/api/reports/${reportId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -184,7 +188,7 @@ const DashboardPage: React.FC = () => {
 
   const releaseReport = async (reportId: string): Promise<void> => {
     try {
-      await fetch(`/api/reports/${reportId}/release`, {
+      await fetch(`${config.apiUrl}/api/reports/${reportId}/release`, {
         method: "POST",
       });
       setSelectedReport(null);

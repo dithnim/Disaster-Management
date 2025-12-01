@@ -7,6 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import type { QueuedReport, OfflineContextValue } from "../types";
+import { endpoints } from "../config";
 
 const OfflineContext = createContext<OfflineContextValue | null>(null);
 
@@ -64,7 +65,7 @@ export function OfflineProvider({
 
     for (const report of pendingReports) {
       try {
-        const response = await fetch("/api/reports", {
+        const response = await fetch(endpoints.reports, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

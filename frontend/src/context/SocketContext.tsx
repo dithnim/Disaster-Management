@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import type { Report, Rescuer, SocketContextValue } from "../types";
+import { config, endpoints } from "../config";
 
 const SocketContext = createContext<SocketContextValue | null>(null);
 
@@ -24,8 +25,8 @@ interface SocketProviderProps {
   children: ReactNode;
 }
 
-// Polling interval when WebSocket is not connected (5 seconds)
-const POLL_INTERVAL = 5000;
+// Use polling interval from config
+const POLL_INTERVAL = config.pollInterval;
 
 export function SocketProvider({
   children,
@@ -38,7 +39,7 @@ export function SocketProvider({
   // Fetch reports via REST API
   const fetchReports = useCallback(async () => {
     try {
-      const response = await fetch("/api/reports");
+      const response = await fetch(endpoints.reports);
       if (response.ok) {
         const data = await response.json();
         setReports(data);
@@ -123,7 +124,7 @@ export function SocketProvider({
         socket.emit("rescuer:join", rescuerInfo);
       }
       // Also register via REST API for AWS deployment
-      fetch("/api/rescuers/register", {
+      fetch(`${config.apiUrl}/api/rescuers/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(rescuerInfo),
