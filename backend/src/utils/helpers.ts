@@ -2,7 +2,7 @@
  * Utility Functions
  */
 
-import { Report, SanitizedReport } from '../types';
+import { Report, SanitizedReport } from "../types";
 
 /**
  * Generate a 4-character alphanumeric short code
@@ -32,7 +32,7 @@ export function sanitizeReport(report: Report): SanitizedReport {
     batteryLevel: report.batteryLevel,
     isMedical: report.isMedical,
     isFragile: report.isFragile,
-    peopleCount: report.peopleCount
+    peopleCount: report.peopleCount,
   };
 }
 
@@ -40,17 +40,20 @@ export function sanitizeReport(report: Report): SanitizedReport {
  * Parse boolean from string or boolean value
  */
 export function parseBoolean(value: string | boolean | undefined): boolean {
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'string') return value === 'true';
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value === "true";
   return false;
 }
 
 /**
  * Parse integer with fallback
  */
-export function parseIntSafe(value: string | number | undefined, fallback: number): number {
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') {
+export function parseIntSafe(
+  value: string | number | undefined,
+  fallback: number
+): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
     const parsed = parseInt(value, 10);
     return isNaN(parsed) ? fallback : parsed;
   }
@@ -60,9 +63,12 @@ export function parseIntSafe(value: string | number | undefined, fallback: numbe
 /**
  * Parse float with fallback
  */
-export function parseFloatSafe(value: string | number | undefined, fallback: number): number {
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') {
+export function parseFloatSafe(
+  value: string | number | undefined,
+  fallback: number
+): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
     const parsed = parseFloat(value);
     return isNaN(parsed) ? fallback : parsed;
   }

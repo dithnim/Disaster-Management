@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart2, Users, AlertTriangle, CheckCircle, Clock, 
-  TrendingUp, RefreshCw, Activity
-} from 'lucide-react';
-import type { StatsResponse } from '../types';
+import React, { useState, useEffect } from "react";
+import {
+  BarChart2,
+  Users,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  RefreshCw,
+  Activity,
+} from "lucide-react";
+import type { StatsResponse } from "../types";
 
 interface StatusCard {
   label: string;
@@ -39,13 +45,13 @@ const StatsPage: React.FC = () => {
 
   const fetchStats = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/stats');
+      const response = await fetch("/api/stats");
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      console.error("Failed to fetch stats:", error);
     } finally {
       setLoading(false);
     }
@@ -68,57 +74,62 @@ const StatsPage: React.FC = () => {
   }
 
   const statusCards: StatusCard[] = [
-    { 
-      label: 'New', 
-      value: stats.byStatus.new, 
-      color: 'bg-red-600', 
+    {
+      label: "New",
+      value: stats.byStatus.new,
+      color: "bg-red-600",
       icon: AlertTriangle,
-      description: 'Awaiting response'
+      description: "Awaiting response",
     },
-    { 
-      label: 'Claimed', 
-      value: stats.byStatus.claimed, 
-      color: 'bg-yellow-600', 
+    {
+      label: "Claimed",
+      value: stats.byStatus.claimed,
+      color: "bg-yellow-600",
       icon: Users,
-      description: 'Rescuer assigned'
+      description: "Rescuer assigned",
     },
-    { 
-      label: 'En Route', 
-      value: stats.byStatus.enRoute, 
-      color: 'bg-blue-600', 
+    {
+      label: "En Route",
+      value: stats.byStatus.enRoute,
+      color: "bg-blue-600",
       icon: Activity,
-      description: 'Help on the way'
+      description: "Help on the way",
     },
-    { 
-      label: 'Rescued', 
-      value: stats.byStatus.rescued + stats.byStatus.closed, 
-      color: 'bg-green-600', 
+    {
+      label: "Rescued",
+      value: stats.byStatus.rescued + stats.byStatus.closed,
+      color: "bg-green-600",
       icon: CheckCircle,
-      description: 'Successfully rescued'
+      description: "Successfully rescued",
     },
   ];
 
   const severityData: SeverityData[] = [
-    { label: 'Critical', value: stats.bySeverity.critical, color: 'bg-red-900' },
-    { label: 'High', value: stats.bySeverity.high, color: 'bg-red-600' },
-    { label: 'Medium', value: stats.bySeverity.medium, color: 'bg-yellow-600' },
-    { label: 'Low', value: stats.bySeverity.low, color: 'bg-green-600' },
+    {
+      label: "Critical",
+      value: stats.bySeverity.critical,
+      color: "bg-red-900",
+    },
+    { label: "High", value: stats.bySeverity.high, color: "bg-red-600" },
+    { label: "Medium", value: stats.bySeverity.medium, color: "bg-yellow-600" },
+    { label: "Low", value: stats.bySeverity.low, color: "bg-green-600" },
   ];
 
-  const totalSeverity = Object.values(stats.bySeverity).reduce((a, b) => a + b, 0) || 1;
+  const totalSeverity =
+    Object.values(stats.bySeverity).reduce((a, b) => a + b, 0) || 1;
 
   const pipelineItems: PipelineItem[] = [
-    { label: 'New', value: stats.byStatus.new, color: 'bg-red-600' },
-    { label: '→', isArrow: true },
-    { label: 'Claimed', value: stats.byStatus.claimed, color: 'bg-yellow-600' },
-    { label: '→', isArrow: true },
-    { label: 'En Route', value: stats.byStatus.enRoute, color: 'bg-blue-600' },
-    { label: '→', isArrow: true },
-    { label: 'Arrived', value: stats.byStatus.arrived, color: 'bg-purple-600' },
-    { label: '→', isArrow: true },
-    { label: 'Rescued', value: stats.byStatus.rescued, color: 'bg-green-600' },
-    { label: '→', isArrow: true },
-    { label: 'Closed', value: stats.byStatus.closed, color: 'bg-gray-600' },
+    { label: "New", value: stats.byStatus.new, color: "bg-red-600" },
+    { label: "→", isArrow: true },
+    { label: "Claimed", value: stats.byStatus.claimed, color: "bg-yellow-600" },
+    { label: "→", isArrow: true },
+    { label: "En Route", value: stats.byStatus.enRoute, color: "bg-blue-600" },
+    { label: "→", isArrow: true },
+    { label: "Arrived", value: stats.byStatus.arrived, color: "bg-purple-600" },
+    { label: "→", isArrow: true },
+    { label: "Rescued", value: stats.byStatus.rescued, color: "bg-green-600" },
+    { label: "→", isArrow: true },
+    { label: "Closed", value: stats.byStatus.closed, color: "bg-gray-600" },
   ];
 
   return (
@@ -151,7 +162,9 @@ const StatsPage: React.FC = () => {
             return (
               <div key={card.label} className="bg-gray-800 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center`}>
+                  <div
+                    className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center`}
+                  >
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <span className="text-3xl font-bold">{card.value}</span>
@@ -171,28 +184,37 @@ const StatsPage: React.FC = () => {
               <TrendingUp className="w-5 h-5 text-blue-400" />
               Overview
             </h2>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-900 rounded-lg p-4 text-center">
                 <p className="text-4xl font-bold text-white">{stats.total}</p>
                 <p className="text-gray-400 text-sm">Total Reports</p>
               </div>
-              
+
               <div className="bg-gray-900 rounded-lg p-4 text-center">
-                <p className="text-4xl font-bold text-green-400">{stats.activeRescuers}</p>
+                <p className="text-4xl font-bold text-green-400">
+                  {stats.activeRescuers}
+                </p>
                 <p className="text-gray-400 text-sm">Active Rescuers</p>
               </div>
-              
+
               <div className="bg-gray-900 rounded-lg p-4 text-center">
-                <p className="text-4xl font-bold text-blue-400">{stats.connectedClients}</p>
+                <p className="text-4xl font-bold text-blue-400">
+                  {stats.connectedClients}
+                </p>
                 <p className="text-gray-400 text-sm">Connected Users</p>
               </div>
-              
+
               <div className="bg-gray-900 rounded-lg p-4 text-center">
                 <p className="text-4xl font-bold text-yellow-400">
-                  {stats.total > 0 
-                    ? Math.round(((stats.byStatus.rescued + stats.byStatus.closed) / stats.total) * 100)
-                    : 0}%
+                  {stats.total > 0
+                    ? Math.round(
+                        ((stats.byStatus.rescued + stats.byStatus.closed) /
+                          stats.total) *
+                          100
+                      )
+                    : 0}
+                  %
                 </p>
                 <p className="text-gray-400 text-sm">Success Rate</p>
               </div>
@@ -205,7 +227,7 @@ const StatsPage: React.FC = () => {
               <AlertTriangle className="w-5 h-5 text-red-400" />
               Severity Breakdown
             </h2>
-            
+
             <div className="space-y-4">
               {severityData.map((item) => {
                 const percentage = (item.value / totalSeverity) * 100;
@@ -213,10 +235,12 @@ const StatsPage: React.FC = () => {
                   <div key={item.label}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-gray-300">{item.label}</span>
-                      <span className="text-gray-400">{item.value} ({percentage.toFixed(1)}%)</span>
+                      <span className="text-gray-400">
+                        {item.value} ({percentage.toFixed(1)}%)
+                      </span>
                     </div>
                     <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full ${item.color} transition-all duration-500`}
                         style={{ width: `${percentage}%` }}
                       />
@@ -233,13 +257,15 @@ const StatsPage: React.FC = () => {
               <Activity className="w-5 h-5 text-green-400" />
               Rescue Pipeline
             </h2>
-            
+
             <div className="flex flex-wrap gap-2 items-center justify-center">
-              {pipelineItems.map((item, index) => (
+              {pipelineItems.map((item, index) =>
                 item.isArrow ? (
-                  <span key={index} className="text-gray-500 text-2xl px-2">→</span>
+                  <span key={index} className="text-gray-500 text-2xl px-2">
+                    →
+                  </span>
                 ) : (
-                  <div 
+                  <div
                     key={index}
                     className={`${item.color} px-4 py-3 rounded-lg text-center min-w-[80px]`}
                   >
@@ -247,7 +273,7 @@ const StatsPage: React.FC = () => {
                     <p className="text-xs opacity-80">{item.label}</p>
                   </div>
                 )
-              ))}
+              )}
             </div>
           </div>
         </div>

@@ -7,22 +7,22 @@
 // ============================================
 
 export enum ReportStatus {
-  NEW = 'new',
-  CLAIMED = 'claimed',
-  EN_ROUTE = 'en_route',
-  ARRIVED = 'arrived',
-  RESCUED = 'rescued',
-  CLOSED = 'closed'
+  NEW = "new",
+  CLAIMED = "claimed",
+  EN_ROUTE = "en_route",
+  ARRIVED = "arrived",
+  RESCUED = "rescued",
+  CLOSED = "closed",
 }
 
 export enum Severity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
-export type ReportSource = 'web' | 'sms' | 'app';
+export type ReportSource = "web" | "sms" | "app";
 
 // ============================================
 // REPORT TYPES
@@ -182,7 +182,7 @@ export interface Stats {
 
 export interface ConnectedClient {
   connectedAt: number;
-  type?: 'user' | 'rescuer';
+  type?: "user" | "rescuer";
   name?: string;
   rescuerId?: string;
 }

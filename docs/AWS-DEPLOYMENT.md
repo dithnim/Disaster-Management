@@ -204,44 +204,51 @@ aws cloudfront create-distribution \
 Users can send SOS via SMS in these formats:
 
 ### Compressed Format (Fastest to type)
+
 ```
 H 6.912 79.852 A
 ```
+
 - `H` = Help/SOS
 - `6.912 79.852` = Latitude Longitude
 - `A` = Situation code
 
 ### Situation Codes
-| Code | Meaning | Severity |
-|------|---------|----------|
-| A | Adult trapped | High |
-| C | Child/Children | Critical |
-| M | Medical emergency | Critical |
-| F | Fire | Critical |
-| W | Water/Flood | High |
-| B | Building collapse | Critical |
-| E | Elderly | High |
-| P | Pregnant | Critical |
-| I | Injured | High |
-| T | Multiple trapped | Critical |
+
+| Code | Meaning           | Severity |
+| ---- | ----------------- | -------- |
+| A    | Adult trapped     | High     |
+| C    | Child/Children    | Critical |
+| M    | Medical emergency | Critical |
+| F    | Fire              | Critical |
+| W    | Water/Flood       | High     |
+| B    | Building collapse | Critical |
+| E    | Elderly           | High     |
+| P    | Pregnant          | Critical |
+| I    | Injured           | High     |
+| T    | Multiple trapped  | Critical |
 
 ### Combined Codes
+
 ```
 H 6.912 79.852 MC    (Medical + Child)
 H 6.912 79.852 BT    (Building + Trapped)
 ```
 
 ### Full Format
+
 ```
 HELP LAT:6.912 LON:79.852 MSG:injured child
 ```
 
 ### Standard Format
+
 ```
 SOS 6.912,79.852 Need help, flooding in basement
 ```
 
 ### Minimal (Just Location)
+
 ```
 6.912 79.852
 ```
@@ -250,18 +257,19 @@ SOS 6.912,79.852 Need help, flooding in basement
 
 ## 💰 Cost Estimation (Monthly)
 
-| Service | Specification | Est. Cost |
-|---------|--------------|-----------|
-| EC2 (t3.micro) | 1 instance, 24/7 | $8.50 |
-| ALB | 1 load balancer | $16.20 |
-| DynamoDB | On-demand, ~10K reports/month | $2.50 |
-| S3 (photos) | 10GB storage | $0.25 |
-| S3 (frontend) | Static hosting | $0.50 |
-| CloudFront | 100GB transfer | $8.50 |
-| Twilio SMS | ~1000 SMS/month | $7.50 |
-| **Total** | | **~$44/month** |
+| Service        | Specification                 | Est. Cost      |
+| -------------- | ----------------------------- | -------------- |
+| EC2 (t3.micro) | 1 instance, 24/7              | $8.50          |
+| ALB            | 1 load balancer               | $16.20         |
+| DynamoDB       | On-demand, ~10K reports/month | $2.50          |
+| S3 (photos)    | 10GB storage                  | $0.25          |
+| S3 (frontend)  | Static hosting                | $0.50          |
+| CloudFront     | 100GB transfer                | $8.50          |
+| Twilio SMS     | ~1000 SMS/month               | $7.50          |
+| **Total**      |                               | **~$44/month** |
 
 For higher availability:
+
 - Add EC2 instances: +$8.50 each
 - Use RDS PostgreSQL: +$15/month
 - Enable DynamoDB autoscaling: variable
@@ -285,6 +293,7 @@ For higher availability:
 ## 📊 Monitoring Setup
 
 ### CloudWatch Alarms
+
 ```bash
 # CPU utilization alarm
 aws cloudwatch put-metric-alarm \
@@ -329,7 +338,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -346,13 +355,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Build
         run: |
           cd frontend
           npm install
           npm run build
-      
+
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
@@ -361,7 +370,7 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: 'frontend/dist'
+          SOURCE_DIR: "frontend/dist"
 ```
 
 ---
@@ -369,17 +378,20 @@ jobs:
 ## 🆘 Troubleshooting
 
 ### SMS not working
+
 1. Check Twilio webhook URL is correct
 2. Verify ALB security group allows Twilio IPs
 3. Check CloudWatch logs for errors
 4. Test with: `curl -X POST YOUR-URL/api/sms/incoming -d "Body=H 6.9 79.8 A&From=+1234"`
 
 ### WebSocket disconnecting
+
 1. ALB idle timeout should be 300+ seconds
 2. Enable sticky sessions on target group
 3. Check EC2 security group allows WebSocket
 
 ### High latency
+
 1. Enable CloudFront caching
 2. Check DynamoDB read capacity
 3. Consider adding EC2 instances
@@ -389,6 +401,7 @@ jobs:
 ## 📞 Emergency Contacts Setup
 
 For Sri Lanka integration, coordinate with:
+
 - National Disaster Relief Services Centre: 117
 - Police Emergency: 119
 - Ambulance: 110

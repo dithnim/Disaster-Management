@@ -1,16 +1,16 @@
-import React from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { AlertTriangle, Map, BarChart2 } from 'lucide-react';
+import React from "react";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { AlertTriangle, Map, BarChart2 } from "lucide-react";
 
 // Pages
-import HomePage from './pages/HomePage.tsx';
-import DashboardPage from './pages/DashboardPage.tsx';
-import TrackPage from './pages/TrackPage.tsx';
-import StatsPage from './pages/StatsPage.tsx';
+import HomePage from "./pages/HomePage.tsx";
+import DashboardPage from "./pages/DashboardPage.tsx";
+import TrackPage from "./pages/TrackPage.tsx";
+import StatsPage from "./pages/StatsPage.tsx";
 
 // Context
-import { SocketProvider } from './context/SocketContext.tsx';
-import { OfflineProvider } from './context/OfflineContext.tsx';
+import { SocketProvider } from "./context/SocketContext.tsx";
+import { OfflineProvider } from "./context/OfflineContext.tsx";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -23,18 +23,21 @@ const App: React.FC = () => {
           <nav className="bg-gray-800 border-b border-gray-700">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center justify-between h-14">
-                <Link to="/" className="flex items-center gap-2 text-red-500 font-bold text-lg">
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 text-red-500 font-bold text-lg"
+                >
                   <AlertTriangle className="w-6 h-6" />
                   <span className="hidden sm:inline">DisasterSOS</span>
                 </Link>
-                
+
                 <div className="flex items-center gap-1">
-                  <Link 
-                    to="/" 
+                  <Link
+                    to="/"
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                      location.pathname === '/' 
-                        ? 'bg-red-600 text-white' 
-                        : 'text-gray-300 hover:bg-gray-700'
+                      location.pathname === "/"
+                        ? "bg-red-600 text-white"
+                        : "text-gray-300 hover:bg-gray-700"
                     }`}
                   >
                     <span className="flex items-center gap-1">
@@ -42,13 +45,13 @@ const App: React.FC = () => {
                       <span className="hidden sm:inline">SOS</span>
                     </span>
                   </Link>
-                  
-                  <Link 
-                    to="/dashboard" 
+
+                  <Link
+                    to="/dashboard"
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                      location.pathname === '/dashboard' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'text-gray-300 hover:bg-gray-700'
+                      location.pathname === "/dashboard"
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-gray-700"
                     }`}
                   >
                     <span className="flex items-center gap-1">
@@ -56,13 +59,13 @@ const App: React.FC = () => {
                       <span className="hidden sm:inline">Dashboard</span>
                     </span>
                   </Link>
-                  
-                  <Link 
-                    to="/stats" 
+
+                  <Link
+                    to="/stats"
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                      location.pathname === '/stats' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'text-gray-300 hover:bg-gray-700'
+                      location.pathname === "/stats"
+                        ? "bg-purple-600 text-white"
+                        : "text-gray-300 hover:bg-gray-700"
                     }`}
                   >
                     <span className="flex items-center gap-1">

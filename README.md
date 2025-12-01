@@ -7,7 +7,7 @@ A comprehensive, real-time disaster management and rescue coordination platform 
 This system enables trapped individuals to send distress reports (SOS) with their location, which rescuers can then claim and respond to in real-time. The platform includes:
 
 - **User App**: One-tap SOS button with GPS, offline queueing, and tracking
-- **Rescuer Dashboard**: Real-time map with clustered markers, claim workflow, and status updates  
+- **Rescuer Dashboard**: Real-time map with clustered markers, claim workflow, and status updates
 - **Analytics Panel**: Live statistics and resource allocation insights
 - **SMS Fallback**: Works even without internet via SMS gateway
 
@@ -87,12 +87,14 @@ Disaster Management/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
 1. **Clone and install backend:**
+
 ```bash
 cd backend
 npm install
@@ -101,6 +103,7 @@ npm run dev
 ```
 
 2. **Install and run frontend:**
+
 ```bash
 cd frontend
 npm install
@@ -108,6 +111,7 @@ npm run dev
 ```
 
 3. **Access the app:**
+
 - User SOS: http://localhost:5173/
 - Rescuer Dashboard: http://localhost:5173/dashboard
 - Statistics: http://localhost:5173/stats
@@ -116,59 +120,61 @@ npm run dev
 
 ### For Users (Trapped Persons)
 
-| Feature | Description |
-|---------|-------------|
-| **One-Tap SOS** | Large emergency button that captures GPS instantly |
-| **Detailed Report** | Add severity, medical flags, photo, and message |
-| **Offline Queue** | Reports queued locally when offline, auto-sync when online |
-| **Tracking Code** | 4-character code to share with others for tracking |
-| **Real-time Updates** | See when rescuer is assigned, en route, and arrived |
-| **SMS Fallback** | Send `SOS LAT,LNG MESSAGE` via SMS when no data |
+| Feature               | Description                                                |
+| --------------------- | ---------------------------------------------------------- |
+| **One-Tap SOS**       | Large emergency button that captures GPS instantly         |
+| **Detailed Report**   | Add severity, medical flags, photo, and message            |
+| **Offline Queue**     | Reports queued locally when offline, auto-sync when online |
+| **Tracking Code**     | 4-character code to share with others for tracking         |
+| **Real-time Updates** | See when rescuer is assigned, en route, and arrived        |
+| **SMS Fallback**      | Send `SOS LAT,LNG MESSAGE` via SMS when no data            |
 
 ### For Rescuers
 
-| Feature | Description |
-|---------|-------------|
-| **Live Map** | Leaflet map with OpenStreetMap, color-coded markers |
-| **Claim System** | Claim reports to prevent duplicate responses |
-| **Status Workflow** | Update: Claimed → En Route → Arrived → Rescued → Closed |
-| **Severity Filters** | Filter by Critical, High, Medium, Low |
-| **Real-time Sync** | All updates pushed via WebSocket instantly |
-| **Mobile Friendly** | Works on phones for field rescuers |
+| Feature              | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| **Live Map**         | Leaflet map with OpenStreetMap, color-coded markers     |
+| **Claim System**     | Claim reports to prevent duplicate responses            |
+| **Status Workflow**  | Update: Claimed → En Route → Arrived → Rescued → Closed |
+| **Severity Filters** | Filter by Critical, High, Medium, Low                   |
+| **Real-time Sync**   | All updates pushed via WebSocket instantly              |
+| **Mobile Friendly**  | Works on phones for field rescuers                      |
 
 ### For Coordinators
 
-| Feature | Description |
-|---------|-------------|
-| **Analytics** | Total reports, by status, by severity |
-| **Pipeline View** | Visual funnel from New to Closed |
-| **Active Users** | See connected rescuers and users |
-| **Success Rate** | Percentage of rescued cases |
+| Feature           | Description                           |
+| ----------------- | ------------------------------------- |
+| **Analytics**     | Total reports, by status, by severity |
+| **Pipeline View** | Visual funnel from New to Closed      |
+| **Active Users**  | See connected rescuers and users      |
+| **Success Rate**  | Percentage of rescued cases           |
 
 ## 📡 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/reports` | Create new SOS report |
-| `GET` | `/api/reports` | List all reports (with filters) |
-| `GET` | `/api/reports/:id` | Get single report by ID or short code |
-| `POST` | `/api/reports/:id/claim` | Claim a report (rescuer) |
-| `PUT` | `/api/reports/:id/status` | Update report status |
-| `POST` | `/api/reports/:id/release` | Release/unclaim a report |
-| `POST` | `/api/rescuers/register` | Register as rescuer |
-| `GET` | `/api/rescuers` | List all rescuers |
-| `GET` | `/api/stats` | Get statistics |
-| `POST` | `/api/sms/incoming` | Twilio SMS webhook |
-| `GET` | `/api/health` | Health check |
+| Method | Endpoint                   | Description                           |
+| ------ | -------------------------- | ------------------------------------- |
+| `POST` | `/api/reports`             | Create new SOS report                 |
+| `GET`  | `/api/reports`             | List all reports (with filters)       |
+| `GET`  | `/api/reports/:id`         | Get single report by ID or short code |
+| `POST` | `/api/reports/:id/claim`   | Claim a report (rescuer)              |
+| `PUT`  | `/api/reports/:id/status`  | Update report status                  |
+| `POST` | `/api/reports/:id/release` | Release/unclaim a report              |
+| `POST` | `/api/rescuers/register`   | Register as rescuer                   |
+| `GET`  | `/api/rescuers`            | List all rescuers                     |
+| `GET`  | `/api/stats`               | Get statistics                        |
+| `POST` | `/api/sms/incoming`        | Twilio SMS webhook                    |
+| `GET`  | `/api/health`              | Health check                          |
 
 ## 🔌 WebSocket Events
 
 ### Client → Server
+
 - `rescuer:join` - Join as rescuer, receive all reports
 - `user:track` - Track a specific report by short code
 - `rescuer:location` - Update rescuer's GPS position
 
 ### Server → Client
+
 - `reports:sync` - Initial sync of all reports
 - `report:new` - New report created
 - `report:update` - Report status changed
@@ -177,6 +183,7 @@ npm run dev
 ## 📱 Progressive Web App
 
 The frontend is a full PWA with:
+
 - **Offline Support**: Service worker caches app shell and map tiles
 - **Install Prompt**: Can be installed to home screen
 - **Push Ready**: Structure supports push notifications (add server)
@@ -194,11 +201,13 @@ The frontend is a full PWA with:
 ## 📲 SMS Fallback (Twilio Integration)
 
 When users have no internet, they can SMS:
+
 ```
 SOS 6.9271,79.8612 Flooding in basement
 ```
 
 To set up:
+
 1. Create Twilio account
 2. Get phone number
 3. Set webhook URL to `/api/sms/incoming`
@@ -207,6 +216,7 @@ To set up:
 ## 🗺️ Sri Lanka Context
 
 This system is optimized for Sri Lanka disaster response:
+
 - Default map centered on Sri Lanka (7.8731, 80.7718)
 - SMS fallback critical for rural areas with poor data
 - Sinhala/Tamil localization ready (add i18n)
@@ -215,6 +225,7 @@ This system is optimized for Sri Lanka disaster response:
 ## 🔧 Production Deployment
 
 ### Recommended Stack
+
 - **Frontend**: Vercel or Netlify (free tier works)
 - **Backend**: Railway, Render, or AWS EC2
 - **Database**: PostgreSQL with PostGIS for geo queries
@@ -222,6 +233,7 @@ This system is optimized for Sri Lanka disaster response:
 - **SMS**: Twilio or local provider
 
 ### Environment Variables
+
 ```env
 PORT=3000
 NODE_ENV=production

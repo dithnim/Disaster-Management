@@ -2,8 +2,14 @@
 // FRONTEND TYPE DEFINITIONS
 // ============================================
 
-export type Severity = 'low' | 'medium' | 'high' | 'critical';
-export type Status = 'new' | 'claimed' | 'en_route' | 'arrived' | 'rescued' | 'closed';
+export type Severity = "low" | "medium" | "high" | "critical";
+export type Status =
+  | "new"
+  | "claimed"
+  | "en_route"
+  | "arrived"
+  | "rescued"
+  | "closed";
 
 // Report from the backend
 export interface Report {
@@ -16,20 +22,20 @@ export interface Report {
   status: Status;
   timestamp: number;
   lastUpdate: number;
-  
+
   // Optional fields
   isMedical?: boolean;
   isFragile?: boolean;
   peopleCount?: number;
   batteryLevel?: number;
   photoUrl?: string;
-  source?: 'web' | 'sms';
-  
+  source?: "web" | "sms";
+
   // Rescuer info
   claimedBy?: string;
   claimedByName?: string;
   claimedAt?: number;
-  
+
   // ETA for victim tracking
   eta?: string;
 }
@@ -42,7 +48,7 @@ export interface Rescuer {
   socketId?: string;
   lat?: number;
   lng?: number;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
   registeredAt?: number;
 }
 
@@ -89,8 +95,8 @@ export interface QueuedReport {
 
 // Filter state for dashboard
 export interface DashboardFilter {
-  status: Status | '';
-  severity: Severity | '';
+  status: Status | "";
+  severity: Severity | "";
 }
 
 // Stats response from API
@@ -130,7 +136,9 @@ export interface SocketContextValue {
 export interface OfflineContextValue {
   isOnline: boolean;
   pendingReports: QueuedReport[];
-  queueReport: (reportData: Omit<QueuedReport, 'queuedAt' | 'localId'>) => QueuedReport;
+  queueReport: (
+    reportData: Omit<QueuedReport, "queuedAt" | "localId">
+  ) => QueuedReport;
   removeFromQueue: (localId: string) => void;
   syncPendingReports: () => Promise<void>;
   pendingCount: number;
