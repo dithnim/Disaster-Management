@@ -375,14 +375,14 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* Hide Completed Toggle */}
-          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
             <input
               type="checkbox"
-              checked={hideCompleted}
-              onChange={(e) => setHideCompleted(e.target.checked)}
+              checked={!hideCompleted}
+              onChange={(e) => setHideCompleted(!e.target.checked)}
               className="w-4 h-4 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800"
             />
-            Hide completed requests
+            Show completed requests
           </label>
         </div>
 
