@@ -102,6 +102,7 @@ const DashboardPage: React.FC = () => {
     status: "",
     severity: "",
   });
+  const [hideCompleted, setHideCompleted] = useState(true); // Hide rescued/closed by default
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     7.8731, 80.7718,
   ]); // Sri Lanka center
@@ -146,8 +147,11 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  const [claimError, setClaimError] = useState<string | null>(null);
+
   const claimReport = async (reportId: string): Promise<void> => {
     if (!rescuerInfo) return;
+    setClaimError(null);
 
     try {
       const response = await fetch(
@@ -163,11 +167,20 @@ const DashboardPage: React.FC = () => {
       );
 
       if (response.ok) {
-        // Report will be updated via WebSocket
+        // Report will be updated via WebSocket/polling
         setSelectedReport(null);
+      } else if (response.status === 409) {
+        // Report already claimed by someone else
+        const data = await response.json();
+        setClaimError(
+          data.claimedBy
+            ? `Already claimed by ${data.claimedBy}`
+            : "This request is already being handled"
+        );
       }
     } catch (error) {
       console.error("Claim error:", error);
+      setClaimError("Failed to claim report. Please try again.");
     }
   };
 
@@ -201,6 +214,10 @@ const DashboardPage: React.FC = () => {
   const filteredReports = reports.filter((r) => {
     if (filter.status && r.status !== filter.status) return false;
     if (filter.severity && r.severity !== filter.severity) return false;
+    // Hide completed reports if the toggle is on
+    if (hideCompleted && (r.status === "rescued" || r.status === "closed")) {
+      return false;
+    }
     return true;
   });
 
@@ -356,6 +373,17 @@ const DashboardPage: React.FC = () => {
               <option value="low">Low</option>
             </select>
           </div>
+
+          {/* Hide Completed Toggle */}
+          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hideCompleted}
+              onChange={(e) => setHideCompleted(e.target.checked)}
+              className="w-4 h-4 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800"
+            />
+            Hide completed requests
+          </label>
         </div>
 
         {/* Reports List */}
@@ -385,6 +413,18 @@ const DashboardPage: React.FC = () => {
                       >
                         {report.severity.toUpperCase()}
                       </span>
+                      {report.status !== "new" &&
+                        report.status !== "closed" &&
+                        report.status !== "rescued" && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-600 text-blue-100">
+                            ONGOING
+                          </span>
+                        )}
+                      {report.status === "rescued" && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-600 text-green-100">
+                          RESCUED
+                        </span>
+                      )}
                       <span
                         className={`w-2 h-2 rounded-full ${getStatusColor(
                           report.status
@@ -540,12 +580,19 @@ const DashboardPage: React.FC = () => {
               </div>
 
               {selectedReport.status === "new" ? (
-                <button
-                  onClick={() => claimReport(selectedReport.id)}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition flex items-center justify-center gap-2"
-                >
-                  <Flag className="w-4 h-4" /> Claim This Rescue
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => claimReport(selectedReport.id)}
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                  >
+                    <Flag className="w-4 h-4" /> Claim This Rescue
+                  </button>
+                  {claimError && (
+                    <p className="text-sm text-red-400 text-center">
+                      {claimError}
+                    </p>
+                  )}
+                </div>
               ) : selectedReport.claimedBy === rescuerInfo?.id ? (
                 <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-2">

@@ -278,12 +278,44 @@ app.post(
       const { id } = req.params;
       const { rescuerId, rescuerName } = req.body;
 
+      // First, check if the report is already claimed
+      const existingReport = await docClient.send(
+        new GetCommand({
+          TableName: REPORTS_TABLE,
+          Key: { id },
+        })
+      );
+
+      if (!existingReport.Item) {
+        res.status(404).json({ error: "Report not found" });
+        return;
+      }
+
+      const report = existingReport.Item as Report;
+
+      // Check if already claimed by someone else
+      if (
+        report.claimedBy &&
+        report.claimedBy !== rescuerId &&
+        report.status !== "new" &&
+        report.status !== "closed"
+      ) {
+        res.status(409).json({
+          error: "Report already claimed",
+          claimedBy: report.claimedByName || "Another rescuer",
+          status: report.status,
+        });
+        return;
+      }
+
       const result = await docClient.send(
         new UpdateCommand({
           TableName: REPORTS_TABLE,
           Key: { id },
           UpdateExpression:
             "SET #status = :status, claimedBy = :rescuerId, claimedByName = :rescuerName, claimedAt = :now, lastUpdate = :now",
+          ConditionExpression:
+            "attribute_not_exists(claimedBy) OR claimedBy = :rescuerId OR #status = :newStatus",
           ExpressionAttributeNames: {
             "#status": "status",
           },
@@ -292,6 +324,7 @@ app.post(
             ":rescuerId": rescuerId,
             ":rescuerName": rescuerName,
             ":now": Date.now(),
+            ":newStatus": "new",
           },
           ReturnValues: "ALL_NEW",
         })
@@ -307,8 +340,17 @@ app.post(
       );
 
       res.json({ ok: true, report: sanitizeReport(updatedReport) });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error claiming report:", error);
+      // Check if it's a conditional check failed error (race condition)
+      if (
+        (error as { name?: string }).name === "ConditionalCheckFailedException"
+      ) {
+        res.status(409).json({
+          error: "Report was just claimed by another rescuer",
+        });
+        return;
+      }
       res.status(500).json({ error: "Failed to claim report" });
     }
   }
